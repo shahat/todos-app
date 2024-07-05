@@ -7,7 +7,7 @@ async function auth(req, res, next) {
     return res.status(401).json({ message: "please login first" });
   }
   try {
-    let decode = await promisify(jwt.verify)(authorization, process.env.SECRET);
+    let  = await promisify(jwt.verify)(authorization, process.env.SECRET);
     req.id = decode.id;
     next();
   } catch (error) {

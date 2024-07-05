@@ -2,6 +2,7 @@
 
 const express = require("express");
 const router = express.Router();
+const validate = require("../utils/validator");
 
 // step-2 =>  importing function from the controller
 
@@ -16,11 +17,12 @@ const {
 
 // step-3 => define the function the you import from the controller on the route
 
-router.post("/", createUser);
-router.get("/:limit/:skip", getAllUsers);
-router.get("/:id", getOneUser);
-router.put("/:id", updateOneUser);
-router.delete("/:id", deleteOneUser);
-router.post("/login", login);
+router.post("/register", validate, createUser);
+router.post("/login", validate, login);
+
+// router.get("/:limit/:skip", getAllUsers);
+// router.get("/:id", getOneUser);
+// router.put("/:id", updateOneUser);
+// router.delete("/:id", deleteOneUser);
 
 module.exports = router;

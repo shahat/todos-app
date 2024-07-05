@@ -23,6 +23,7 @@ const getAll = async (req, res) => {
     res.status(500).json({ message: "something Went rong " });
   }
 };
+
 // Get all todos
 const getOne = async (req, res) => {
   let id = req.params.id;

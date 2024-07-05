@@ -17,6 +17,7 @@
     "cors": "^2.8.5",
     "jsonwebtoken": "^9.0.2",
     "mogoose": "^0.0.1-security",
-    "mongoose": "^7.5.0"
+    "mongoose": "^7.5.0",
+    "validator": "^13.12.0"
   }
 }

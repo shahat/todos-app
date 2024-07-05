@@ -1,20 +1,58 @@
 const usersModel = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-// create to dos function
+
+// ================= create user ================
 const createUser = async (req, res) => {
   const user = req.body;
-  // here we are using try and catch to handle the server error
-  try {
-    // the  parameters that you send in the body that wantch with the schema the only parameter will be saved
+  console.log(user);
 
-    const newUser = await usersModel.create(user);
-    res.status(201).json({ message: " to do is saved ", data: newUser });
+  try {
+    // Check if the user already exists
+    let existingUser = await usersModel.findOne({ email: user.email });
+    console.log("existingUser:", existingUser);
+
+    if (existingUser) {
+      return res.status(409).json({ message: "User already exists, please login." });
+    }
+
+    // Create a new user
+    let newUser = await usersModel.create(user);
+
+    // Convert newUser to an object and exclude the password
+    newUser = newUser.toObject();
+    delete newUser.password;
+
+    res.status(201).json({ message: "New user is created", data: newUser });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
+}; // =====================================================================================
+// ================ login ================
+
+const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await usersModel.findOne({ email: email });
+  // if the user is not existed
+  if (!user)
+    return res.status(404).json({ message: "invalide email or password " });
+
+  // check the password using bycryp
+  let isValid = bcrypt.compare(password, user.password);
+  if (!isValid) res.status(401).json({ message: "invalide email or password" });
+
+  // generate token
+  const token = jwt.sign(
+    { id: user._id, name: user.email },
+    process.env.SECRET,
+    { expiresIn: "1h" }
+  );
+  //sent token to the user
+  res.status(200).json({ token: token });
 };
-// Get all users
+// =====================================================================================
+// ================ get all users ================
 const getAllUsers = async (req, res) => {
   let limit = parseInt(req.params.limit);
   let skip = parseInt(req.params.skip);
@@ -26,8 +64,9 @@ const getAllUsers = async (req, res) => {
     res.status(500).json({ message: "something Went rong " });
   }
 };
-// Get user by : Id => but return the first name
 
+// =====================================================================================
+// ================ Get user by : Id =============
 const getOneUser = async (req, res) => {
   let id = req.params.id;
   //   console.log(id);
@@ -38,8 +77,8 @@ const getOneUser = async (req, res) => {
     res.status(404).json({ message: "Cant find this ID " });
   }
 };
-// // update  by id :
-
+// =====================================================================================
+// ================ update  by id : ============
 const updateOneUser = async (req, res) => {
   let { id } = req.params;
   let { username } = req.body;
@@ -50,8 +89,8 @@ const updateOneUser = async (req, res) => {
     res.status(500).json({ message: " Error in update the document" });
   }
 };
-
-// Delelte user by id :
+// =====================================================================================
+// ================ Delelte user by id :
 const deleteOneUser = async (req, res) => {
   let { id } = req.params;
   try {
@@ -60,36 +99,6 @@ const deleteOneUser = async (req, res) => {
   } catch (err) {
     res.status(500).json({ message: " Error in deleting the user  " });
   }
-};
-
-// Delelte user by id :
-const login = async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    return res
-      .status(400)
-      .json({ message: "please provide your user name and password" });
-  }
-  // check the user is existed
-  const user = await usersModel.findOne({ username: username });
-
-  if (!user)
-    return res.status(404).json({ message: "invalide email or password " });
-  console.log(user);
-  // check the password using bycryp
-  let isValid = bcrypt.compare(password, user.password);
-  if (!isValid) res.status(401).json({ message: "invalide email or password" });
-
-  // generate token
-  const token = jwt.sign(
-    { id: user._id, name: user.userName },
-    process.env.SECRET,
-    {
-      expiresIn: "1h",
-    }
-  );
-  //sent token to the user
-  res.status(200).json({ token: token });
 };
 
 module.exports = {
